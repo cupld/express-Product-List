@@ -1,6 +1,16 @@
 const Product = require("../../db/models/Product");
 let products = require("../../products");
 
+exports.showProduct = async (productId,next) =>{
+    try{
+        const prod = await Product.findById(productId);
+        return prod;
+    }
+    catch(error){
+        next(error)
+    }
+}
+
 exports.fetchProducts= async(req,res, next) => {
     try{
         const productArray = await Product.find()
@@ -19,12 +29,10 @@ exports.postProduct= async(req,res, next) =>{
     next(error);
     }
 }
-exports.deleteProduct= async(req,res, next) =>{
-    const {productId}= req.params; 
+exports.deleteProduct= async(req,res, next) =>{ 
     try{
-    const foundProduct = await Product.findByIdAndDelete({_id: productId});
-    if(foundProduct) res.status(204).end();
-    else next({status:404, message: "Product not found"});
+    await Product.findByIdAndDelete({_id: req.product.id});
+    res.status(204).end();
     }
     catch(error){
     next(error);
@@ -32,13 +40,12 @@ exports.deleteProduct= async(req,res, next) =>{
 }
 
 exports.updateProduct= async(req,res, next) =>{
-    const { productId }= req.params;
+    
     try{
         const foundProduct = await Product.findByIdAndUpdate(
-            {_id: productId}, req.body, 
+            {_id: req.product.id}, req.body, 
             { new: true, runValidators: true });
-        if (foundProduct) res.json(foundProduct);
-        else next({status:404, message: "Product not found"});
+            res.json(foundProduct);
     }
     catch(error){
     next(error);
